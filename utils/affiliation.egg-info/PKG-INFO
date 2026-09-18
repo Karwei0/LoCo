@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: affiliation
+Version: 1.0
+Summary: Compute the affiliation metrics
+Home-page: https://github.com/ahstat/affiliation-metrics-py
+Author: Alexis Huet and others
+Author-email: alexis.huet@huawei.com
+License: MIT
+Platform: any
+Dynamic: author
+Dynamic: author-email
+Dynamic: home-page
+Dynamic: license
+Dynamic: platform
+Dynamic: summary
