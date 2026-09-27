@@ -7,8 +7,8 @@ if [ ! -d "./logs/${model_name}" ]; then
 fi
 
 pred_len=1
-seq_len=10
-topk=15
+seq_len=0
+topk=0.3
 lradj=type2
 dataset=SMD
 train_epochs=50

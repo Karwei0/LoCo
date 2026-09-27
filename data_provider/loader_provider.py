@@ -1,8 +1,4 @@
-# -*- coding = utf-8 -*-
-# @Time: 2025/10/18 11:05
-# @Author: wisehone
-# @File: loader_provider.py
-# @SoftWare: PyCharm
+
 import sys
 sys.path.append('..')
 sys.path.append('.')
@@ -56,7 +52,7 @@ def get_data_loader(root_path, batch_size, seq_len, pred_len=1, step=1, mode='tr
 if __name__ == '__main__':
     dataset, loader = get_data_loader(None, 4, 100, 20, step=1, mode='test', dataset='CICIDS')
     sm = 0
-    for i, (x, y,  label) in enumerate(loader):   # 测试时返回 (X, y, label)
+    for i, (x, y,  label) in enumerate(loader):   # (X, y, label)
         print(x.shape, label.shape)
         # sm += label.sum()
         # print('sum: ', label.sum())

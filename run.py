@@ -152,7 +152,7 @@ if __name__ == '__main__':
      if args.root_analysis == 1:
           reports_dir = './reports'
           os.makedirs(reports_dir, exist_ok=True)
-          sub_dir = os.path.join(reports_dir, args.model)  # 使用原始 model_id 作为子文件夹名
+          sub_dir = os.path.join(reports_dir, args.model)  
           os.makedirs(sub_dir, exist_ok=True)
 
      if args.compress_causal_mat == 1:

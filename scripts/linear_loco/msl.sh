@@ -7,8 +7,8 @@ if [ ! -d "./logs/${model_name}" ]; then
 fi
 
 pred_len=1
-seq_len=10
-topk=1
+seq_len=0
+topk=0.05
 lradj=type2
 dataset=MSL
 train_epochs=20

@@ -11,7 +11,7 @@ class RootCauseAnalyzer:
         self.parents_candidates = parents_candidates  # list of list, each (j, tau, strength)
         self.device = device
         self.model.eval()
-        self.max_depth = 2 * args.seq_len # 可适当调大
+        self.max_depth = 2 * args.seq_len # Can be appropriately increased
 
     def analyze(self, idx, x, y, y_hat, sample_data):
         e = (y - y_hat) / self.sigma.cpu().numpy()   # (N,)
@@ -26,9 +26,9 @@ class RootCauseAnalyzer:
 
         all_roots = []
 
-        # 这里只处理当前时间步 偏离最大的变量 （认定为异常变量） 
-        # 但是也可以对其他变量进行根因 （其他大于阈值的变量）也作为根因进行分析
-        # 但是为了简洁，这里就只处理最明显的变量
+        # Here only the variable with the largest deviation at the current time step is processed (regarded as the anomalous variable)
+        # But root causes can also be analyzed for other variables (other variables exceeding the threshold)
+        # For simplicity, only the most obvious variable is processed here
         roots = self._trace(i_star, idx, x, y, y_hat, sample_data,
                             path=[(i_star, 0, 0.0)], accum_contrib=0.0, total_lag=0)
         all_roots.extend(roots)
@@ -38,14 +38,14 @@ class RootCauseAnalyzer:
         #                         path=[(i, 0, 0.0)], accum_contrib=0.0, total_lag=0)
         #     all_roots.extend(roots)
         
-        # 去重（按变量和滞后合并，保留贡献绝对值最大的）
+        # Deduplicate (merge by variable and lag, keeping the one with the largest absolute contribution)
         root_dict = {}
         for r in all_roots:
             key = (r['var'], r['lag'])
             if key not in root_dict or abs(r['contrib']) > abs(root_dict[key]['contrib']):
                 root_dict[key] = r
 
-        # 计算每个根因的归因分数
+        # Compute the attribution score for each root cause
         for key, r in root_dict.items():
             r['attr'] = self._compute_attr(idx, x, y, y_hat, r['var'], r['lag'], sample_data)
 
@@ -75,7 +75,7 @@ class RootCauseAnalyzer:
             # if idx - tau < 0 or idx - tau >= len(sample_data):
             #     continue
             y_hat_arr = sample_data[idx - tau]['y_hat']
-            # 安全检查：如果 j 超出 y_hat 长度，跳过该父节点并警告
+            # Safety check: if j exceeds the length of y_hat, skip this parent and warn
             if j >= len(y_hat_arr):
                 # print(f"Warning: j={j} out of range for y_hat length {len(y_hat_arr)}, skipping parent")
                 continue
@@ -107,10 +107,10 @@ class RootCauseAnalyzer:
 
         contributions = []
         for m, (j, tau) in enumerate(valid_parents):
-            c = (y_hat_orig[i] - y_hat_mod[m, i]) / self.sigma[i]  # 标准化贡献
+            c = (y_hat_orig[i] - y_hat_mod[m, i]) / self.sigma[i]  # Standardized contribution
             contributions.append((j, tau, c.item()))
 
-        # 筛选显著贡献
+        # Filter significant contributions
         eta = 0.2 * self.tau_i[i].item()
         significant = [(j, tau, c) for (j, tau, c) in contributions if abs(c) >= eta]
         if not significant:
@@ -118,14 +118,14 @@ class RootCauseAnalyzer:
 
         root_causes = []
         for (j, tau, c) in significant:
-            # 检查父节点是否异常
+            # Check whether the parent node is anomalous
             y_parent = sample_data[idx - tau]['y']
             y_hat_parent = sample_data[idx - tau]['y_hat']
             sigma_j = self.sigma[j].item()
             tau_j = self.tau_i[j].item()
             e_parent = (y_parent - y_hat_parent) / sigma_j
             
-            # 如果绝对滞后超出窗口长度，不再递归，直接视为根因
+            # If the absolute lag exceeds the window length, stop recursion and treat it directly as a root cause
             if total_lag + tau > self.args.seq_len:
                 root_causes.append({
                     'var': j,
@@ -134,7 +134,7 @@ class RootCauseAnalyzer:
                     'contrib': accum_contrib + c
                 })
             elif abs(e_parent[j]) > tau_j:
-                # 父节点异常，继续递归
+                # Parent node is anomalous, continue recursion
                 sub_path = path + [(j, total_lag + tau, c)]
                 sub_roots = self._trace(j, idx - tau,
                                         sample_data[idx - tau]['x'],
@@ -146,7 +146,7 @@ class RootCauseAnalyzer:
                                         depth + 1)
                 root_causes.extend(sub_roots)
             else:
-                # 父节点正常，视为根因
+                # Parent node is normal, treat it as a root cause
                 root_causes.append({
                     'var': j,
                     'lag': total_lag + tau,
@@ -156,7 +156,7 @@ class RootCauseAnalyzer:
         return root_causes
 
     def _compute_attr(self, idx, x, y, y_hat, root_var, root_lag, sample_data):
-        if root_var == 0: # 根因为自变量
+        if root_var == 0: # Root cause is the independent variable
             return 0.0
         if root_lag > self.args.seq_len:
             return 0.0
@@ -178,6 +178,6 @@ class RootCauseAnalyzer:
         e_mod = (y - y_hat_mod) / self.sigma.cpu().numpy()
         spe_orig = np.sum(e_orig ** 2)
         spe_mod = np.sum(e_mod ** 2)
-        attr = spe_orig - spe_mod   # 应为正
+        attr = spe_orig - spe_mod   # Should be positive
         # return max(0.0, attr)
         return abs(attr)

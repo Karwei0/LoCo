@@ -7,8 +7,8 @@ if [ ! -d "./logs/${model_name}" ]; then
 fi
 
 pred_len=1
-seq_len=20
-topk=15
+seq_len=0
+topk=0.3
 lradj=type2
 
 cuda_ids=5
@@ -31,5 +31,5 @@ python -u run.py \
     --topk 51 \
     --learning_rate 0.001 \
     --gpu 0 \
-    --ad_quantile 0.92 \
+    --ad_quantile 0.95 \
     2>&1 | tee -a logs/${model_name}/SWAT_${model_name}_${seq_len}_${pred_len}.log

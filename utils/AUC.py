@@ -1,9 +1,3 @@
-# -*- coding = utf-8 -*-
-# @Time: 2025/2/17 20:51
-# @Author: wisehone
-# @File: AUC.py
-# @SoftWare: PyCharm
-
 import numpy as np
 from sklearn import metrics
 

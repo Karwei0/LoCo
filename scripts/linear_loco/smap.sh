@@ -7,7 +7,7 @@ if [ ! -d "./logs/${model_name}" ]; then
 fi
 
 pred_len=1
-seq_len=10
+seq_len=20
 topk=15
 lradj=type2
 dataset=SMAP

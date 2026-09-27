@@ -5,8 +5,8 @@ import torch.nn as nn
 class RFF(object):
      def __init__(self, N, L, D, sigma=1.0, seed=None, device='cuda:0'):
           """
-          D: 每个滞后变量的(映射的）特征维度
-          sigma: 高斯核带宽
+          D: (mapped) feature dimension for each lagged variable
+          sigma: Gaussian kernel bandwidth
           """
           self.N = N
           self.L = L

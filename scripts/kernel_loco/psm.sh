@@ -7,8 +7,8 @@ if [ ! -d "./logs/${model_name}" ]; then
 fi
 
 pred_len=1
-seq_len=20
-topk=15
+seq_len=40
+topk=25
 lradj=type2
 
 cuda_ids=5

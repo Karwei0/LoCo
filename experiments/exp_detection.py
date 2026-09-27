@@ -131,7 +131,7 @@ def compute_model_stats(model, args, num_iterations=50):
           f.write(f"\tInference Time / iter: {avg_inference_time * 1000:.3f} ms\n")
           f.write(f"\tInference Memory Usage: {inference_memory:.2f} MB\n\n\n")
 
-     # 打印结果
+     # Print results
 
      print(f"Training Time / iter: {avg_training_time * 1000:.3f} ms")
      print(f"Training Memory Usage: {training_memory:.3f} MB")
@@ -419,7 +419,7 @@ class Exp_Detection(Exp_Basic):
 
                          # IMPORTANT!!
                          if epoch >= self.args.warmup_epochs:
-                              self.model.topk_gradient_mask() # 0724前面没有被调用 忘记加括号()
+                              self.model.topk_gradient_mask() # 0724 was not called before, forgot to add parentheses ()
                          # else:
                          #      print(f'Warmup epochs')
 
@@ -534,7 +534,7 @@ class Exp_Detection(Exp_Basic):
                     mask_mat_list.append(mask_mat)
 
                     if self.args.root_analysis:
-                         # batch_x 是输入窗口，形状 (B, T, N)
+                         # batch_x is the input window, shape (B, T, N)
                          batch_x_np = batch_x.cpu().numpy()
                          for b in range(B):
                               seq_idx = global_idx + b
@@ -544,8 +544,8 @@ class Exp_Detection(Exp_Basic):
                               sample_data.append({
                                    'idx': seq_idx,
                                    'x': batch_x_np[b],               # (T, N)
-                                   'y': batch_y_np[b, -1, :],        # 当前时刻真值
-                                   'y_hat': outputs[b, -1, :]        # 当前时刻预测
+                                   'y': batch_y_np[b, -1, :],        # ground truth at current time step
+                                   'y_hat': outputs[b, -1, :]        # prediction at current time step
                               })
                          global_idx += B
 
@@ -705,7 +705,7 @@ class Exp_Detection(Exp_Basic):
           self.theta_spe = torch.quantile(spe, self.args.ad_quantile)
           # print(f'[debug] self.theta_spe: {self.theta_spe.shape}, self.theta_spe: {self.theta_spe}')
 
-          beta = 0.01  # 可调整，或从args获取
+          beta = 0.01  # Adjustable, or get from args
           lower = torch.quantile(e, beta/2, dim=0)
           upper = torch.quantile(e, 1 - beta/2, dim=0)
           self.tau_i = torch.max(torch.abs(lower), torch.abs(upper))
@@ -755,9 +755,9 @@ class Exp_Detection(Exp_Basic):
      
      def _extract_parents_candidates(self):
           """
-          从训练好的模型中提取每个输出变量的候选父节点列表（按强度排序）。
-          对于线性 LoCo，使用权重绝对值；对于 Kernel LoCo，计算组范数。
-          同时修剪：去除自环，过滤弱连接。
+          Extract the list of candidate parent nodes for each output variable from the trained model (sorted by strength).
+          For Linear LoCo, use the absolute weight values; for Kernel LoCo, compute group norms.
+          Also prune: remove self-loops and filter weak connections.
           """
           weight = self.model.linear.weight.detach().cpu()
           N = self.args.input_dim
@@ -773,30 +773,30 @@ class Exp_Detection(Exp_Basic):
 
           k = min(self.args.topk, N * L)
           
-          # 可选的弱连接阈值：设为所有非零范数的 1% 分位数，或固定小值
+          # Optional weak connection threshold: set to the 1% quantile of all non-zero norms, or a fixed small value
           all_vals = group_norms.flatten()
           non_zero_vals = all_vals[all_vals > 0]
           if len(non_zero_vals) > 0:
-               threshold = torch.quantile(non_zero_vals, 0.1)  # 1% 分位数
+               threshold = torch.quantile(non_zero_vals, 0.1)  # 1% quantile
           else:
                threshold = 1e-6
-          # 也可以直接用固定阈值，如 threshold = 1e-4
+          # Can also use a fixed threshold, e.g., threshold = 1e-4
           # threshold = 1e-4
           
           parents_candidates = []
           for i in range(N):
                row = group_norms[i]                     # (N*L,)
-               vals, indices = torch.topk(row, k)       # 默认降序
+               vals, indices = torch.topk(row, k)       # default descending
                parents = []
                for idx, val in zip(indices, vals):
                     if val <= threshold:
-                         break  # 因为降序，后续值更小，直接跳出
+                         break  # Since sorted in descending order, subsequent values are smaller, break directly
                     col = idx.item()
-                    t = col // N          # 时间步索引，0 ~ L-1，0 对应最早的历史点
+                    t = col // N          # Time step index, 0 ~ L-1, 0 corresponds to the earliest historical point
                     # t = col // N + 1
-                    var = col % N         # 变量索引，0 ~ N-1
-                    tau = L - t           # 滞后 1 ~ L
-                    if var == i:          # 去除自环
+                    var = col % N         # Variable index, 0 ~ N-1
+                    tau = L - t           # Lag 1 ~ L
+                    if var == i:          # Remove self-loops
                          continue
                     parents.append((var, tau, val.item()))
                parents_candidates.append(parents)
@@ -808,7 +808,7 @@ class Exp_Detection(Exp_Basic):
 
      def _run_root_cause_analysis(self, sample_data, setting):
           """
-          使用收集的样本数据执行根因分析，并生成报告。
+          Perform root cause analysis using the collected sample data and generate a report.
           """
           if not self.parents_candidates:
                print("Warning: No parents candidates available. Skip root cause analysis.")
@@ -827,12 +827,12 @@ class Exp_Detection(Exp_Basic):
 
           anomalies = []
           total = len(sample_data)
-          # 每处理 1% 或至少每 1000 个样本打印一次
-          print_interval = max(1, total // 20)  # 5% 的样本数
+          # Print once every 1% or at least every 1000 samples
+          print_interval = max(1, total // 20)  # 5% of the number of samples
           start_time = time.time()
           
           for idx, data in enumerate(sample_data):
-               # 定期打印进度
+               # Periodically print progress
                if idx % print_interval == 0 or idx == total - 1:
                     elapsed = time.time() - start_time
                     progress = (idx + 1) / total * 100
@@ -849,7 +849,7 @@ class Exp_Detection(Exp_Basic):
      
      def _generate_report(self, anomalies, setting):
           """
-          生成简洁美观的根因分析报告（txt格式）。
+          Generate a concise and readable root cause analysis report (txt format).
           """
           reports_dir = os.path.join('.', 'reports', self.args.model)
           os.makedirs(reports_dir, exist_ok=True)
@@ -879,7 +879,7 @@ class Exp_Detection(Exp_Basic):
                          else:
                               score_str = f"attribution score: {r['attr']:.4f}"
                          f.write(f"  - Variable {r['var']}, lag {r['lag']} ({score_str})\n")
-                         # 打印传播路径
+                         # Print propagation path
                          path_str = " -> ".join([f"X{p[0]}(t-{p[1]})" for p in r['path']])
                          f.write(f"    Path: {path_str}\n")
                          f.write(f"    Cumulative contribution: {r['contrib']:.4f}\n")
@@ -888,11 +888,11 @@ class Exp_Detection(Exp_Basic):
 
      def _compress_causal_matrix(self, S):
           """
-          将原始因果矩阵 S (N, N*L) 列顺序为 [t=0..L-1, var=0..N-1] 压缩为 (N, N) 的全局因果强度矩阵。
-          参数：
-               S: torch.Tensor, shape (N, N*L)
-          返回：
-               torch.Tensor, shape (N, N)
+          Compress the raw causal matrix S (N, N*L) with column order [t=0..L-1, var=0..N-1] into an (N, N) global causal strength matrix.
+          Args:
+              S: torch.Tensor, shape (N, N*L)
+          Returns:
+              torch.Tensor, shape (N, N)
           """
           method = self.args.compress_causal_mat_method
           quantile = self.args.compress_causal_mat_quantile
@@ -902,8 +902,8 @@ class Exp_Detection(Exp_Basic):
           el_symmetric = self.args.el_symmetric
 
           # (N, L, N)
-          # 应该是主对角线强相关
-          # 直接 view(N, L, N) 因为训练数据的维度是 (L, N)
+          # The main diagonal should be strongly correlated
+          # Directly view(N, L, N) because the training data dimension is (L, N)
           S_reshaped = S.view(N, L, N)
           
           # S_reshaped = S.view(N, N, L)
@@ -922,10 +922,10 @@ class Exp_Detection(Exp_Basic):
                raise ValueError(f"Invalid compression method: {method}")
 
           if el_symmetric == 1:
-               diag = torch.diag(C)                     # 保存对角线
-               C = C - C.T                              # 去掉对称部分
-               C = torch.relu(C)                        # 只保留正向差异
-               # 恢复对角线（公式 Ai,i = Ai,i）
+               diag = torch.diag(C)                     # Save the diagonal
+               C = C - C.T                              # Remove the symmetric part
+               C = torch.relu(C)                        # Keep only positive differences
+               # Restore the diagonal (formula Ai,i = Ai,i)
                C = C + torch.diag(diag)
 
           if 0 < quantile < 1:
