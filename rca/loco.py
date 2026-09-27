@@ -266,7 +266,7 @@ class LoCo:
         print(final_msg)
 
     def _save_rca_metrics(self, ac_at, avg_at, ac_star_at, avg_star):
-        """将本次评估的参数与指标追加写入 log/{kernel_loco|linear_loco}_rca.csv"""
+        """Append the parameters and metrics of this evaluation to log/{kernel_loco|linear_loco}_rca.csv"""
         model_name = 'kernel_loco' if self.kernel else 'linear_loco'
         os.makedirs('log', exist_ok=True)
         file_path = os.path.join('log', f'{model_name}_rca.csv')

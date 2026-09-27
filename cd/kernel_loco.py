@@ -69,9 +69,9 @@ class Model(nn.Module):
      def get_causal_matrix(self):
           W = self.linear.weight.data                     # (N, NL*D)
           W_reshaped = W.view(self.N, self.NL, self.D)    # (N, NL, D)
-          # mean_w = W_reshaped.mean(dim=2)                 # (N, NL)  平均方向
-          norm_w = W_reshaped.norm(dim=2)                 # (N, NL)  强度
-          # S = torch.sign(mean_w) * norm_w                 # 带符号强度
+          # mean_w = W_reshaped.mean(dim=2)                 # (N, NL)  average direction
+          norm_w = W_reshaped.norm(dim=2)                 # (N, NL)  strength
+          # S = torch.sign(mean_w) * norm_w                 # signed strength
           S = norm_w
           if self.mask is not None:
               S = S * self.mask

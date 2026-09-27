@@ -7,7 +7,7 @@ class Model(nn.Module):
         super(Model, self).__init__()
         self.N = args.input_dim
         self.L = args.seq_len
-        self.NL = self.N * self.L # 应该是 LN 才更加准确
+        self.NL = self.N * self.L # It should be LN to be more accurate
         self.linear = nn.Linear(self.NL, self.N, bias=False)
         self.topk = args.topk
 

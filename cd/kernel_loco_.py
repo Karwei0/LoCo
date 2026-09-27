@@ -28,13 +28,13 @@ def kernel_loco_baseline(data_sample, cfg):
     val_ratio = getattr(cfg, 'val_ratio', 0.1)
     device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
 
-    # 标准化（Kernel 版本建议保留，因为 RFF 对尺度较敏感）
+    # Standardization (recommended for the Kernel version, since RFF is sensitive to scale)
     # mean = np.mean(data_sample, axis=0, keepdims=True)
     # std = np.std(data_sample, axis=0, keepdims=True) + 1e-8
     # data_norm = (data_sample - mean) / std
     data_norm = data_sample # [0924]
 
-    # 滑动窗口
+    # Sliding window
     T = data_norm.shape[0]
     X_list, y_list = [], []
     for t in range(seq_len, T):
@@ -44,7 +44,7 @@ def kernel_loco_baseline(data_sample, cfg):
     y = np.array(y_list)
     n_total = X.shape[0]
 
-    # 时间顺序划分
+    # Chronological split
     n_val = max(1, int(val_ratio * n_total))
     n_train = n_total - n_val
     X_train, y_train = X[:n_train], y[:n_train]
@@ -61,7 +61,7 @@ def kernel_loco_baseline(data_sample, cfg):
         batch_size=batch_size, shuffle=False,
     )
 
-    # 模型
+    # Model
     args = type('Args', (), {})()
     args.input_dim = N
     args.seq_len = seq_len
@@ -76,7 +76,7 @@ def kernel_loco_baseline(data_sample, cfg):
     optimizer = optim.Adam(model.parameters(), lr=lr)
     early_stopper = EarlyStoppingSimple(patience=patience, delta=delta, verbose=True)
 
-    # 训练 + 早停
+    # Training + early stopping
     for epoch in range(epochs):
         model.train()
         total_loss = 0.0
@@ -114,7 +114,7 @@ def kernel_loco_baseline(data_sample, cfg):
     early_stopper.restore(model)
     model.eval()
 
-    # 提取因果矩阵
+    # Extract causal matrix
     S = model.get_causal_matrix()
     S = S.detach().cpu().numpy()
 
@@ -124,7 +124,7 @@ def kernel_loco_baseline(data_sample, cfg):
         t = seq_len - lag
         pred[:, :, lag - 1] = S_reshaped[:, t, :]
 
-    # 自环置零（如需保留可在配置里加开关）
+    # Zero out self-loops (can add a switch in the config if they need to be kept)
     # mask = 1 - np.eye(N, dtype=pred.dtype)
     # pred = pred * mask[:, :, np.newaxis]
 
