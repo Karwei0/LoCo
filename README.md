@@ -1,4 +1,4 @@
-# LoCo: Local Competitive Learning for Interpretable Time Series
+# LoCo: Local Competitive Learning for Interpretable Multivariate Time Series Anomaly Detection
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=plastic)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-green.svg)](https://www.python.org/)
@@ -6,13 +6,13 @@
 
 > LoCo is a lightweight and interpretable framework for multivariate time series anomaly detection, root cause analysis, and time-lagged causal discovery.
 
-# 🧭 Overview
+## 🧭 Overview
 
 Multivariate time series anomaly detection is critical in streaming data scenarios such as cyber-physical systems, finance, and industrial monitoring. Beyond detecting when an anomaly occurs, operators need to know why it happened and where the root cause lies. Existing methods often rely on heavy deep architectures and only localize anomalous variables at the current timestamp, overlooking the temporal evolution of anomalies along causal chains.
 
 LoCo is inspired by the physical concept of a light cone: just as we observe the sun as it was eight minutes ago, severe anomalies that trigger alerts are often shadows of inconspicuous upstream disturbances that occurred earlier. Motivated by two design principles—Finite Temporal Horizon and Causal Horizon, LoCo learns a sparse time-lagged causal graph directly from a single-layer predictor trained with local competitive learning.
 
-# ✨ Key Features
+## ✨ Key Features
 
 - **Local Competitive Learning**: During backpropagation, each output variable updates only the top-\(k\) gradient-magnitude connections, forcing a sparse causal topology to emerge naturally.
 - **Time-Lagged Causal Matrix**: The learned weight matrix serves as a fine-grained causal graph that encodes how past variables at specific lags influence current targets.
@@ -21,7 +21,7 @@ LoCo is inspired by the physical concept of a light cone: just as we observe the
 - **Lightweight and Efficient**: Minimal parameters, low memory overhead, fast inference, suitable for resource-constrained online deployment.
 - **Unified Framework**: A single model simultaneously supports online anomaly detection, causal-driven root cause analysis, and time-lagged causal discovery.
 
-# 🎯 Target Tasks
+## 🎯 Target Tasks
 
 LoCo addresses three tasks in a unified workflow:
 
@@ -37,7 +37,7 @@ LoCo addresses three tasks in a unified workflow:
    The same time-lagged matrix can be compressed into a global \(N \times N\) causal graph for conventional causal discovery tasks.  
    *Metrics*: AUROC, Individual AUROC (InROC).
 
-# 📁 Repository Structure
+## 📁 Repository Structure
 
 ```txt
 LoCo/
@@ -56,7 +56,7 @@ LoCo/
 └── README.md               # This file
 ```
 
-# 🚀 Installation
+## 🚀 Installation
 
 1. Clone the repository:
 ```bash
@@ -80,15 +80,13 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install -r requirements.txt
 ```
 
-# 📊 Quick Start
+## 📊 Quick Start
 
-## Anomaly Detection (AD)
+### Anomaly Detection (AD)
 
 1. **Data preparation**  
-   Download the datasets MSL, SMAP, PSM, SWaT, SMD, GECCO, Creditcard, SWAN from  
-   [Most AD datasets](https://drive.google.com/drive/folders/1RaIJQ8esoWuhyphhmMaH-VCDh-WIluRR).  
-   For CICIDS, download from  
-   [CICIDS dataset](https://drive.google.com/file/d/1V5BAHWBKU8uih3hE1R7WdF6_crZlIbQT/view?usp=drive_link).  
+   Download the datasets MSL, SMAP, PSM, SWaT, SMD, GECCO, Creditcard, SWAN from [Most AD datasets](https://drive.google.com/drive/folders/1RaIJQ8esoWuhyphhmMaH-VCDh-WIluRR).  
+   For CICIDS, download from [CICIDS dataset](https://drive.google.com/file/d/1V5BAHWBKU8uih3hE1R7WdF6_crZlIbQT/view?usp=drive_link).  
    Then run:
    ```bash
    python datasets/process.py
@@ -101,14 +99,14 @@ pip install -r requirements.txt
    ```
    Kernel LoCo scripts are under `scripts/kernel_loco/`.
 
-## Root Cause Analysis (RCA)
+### Root Cause Analysis (RCA)
 
 We build upon the [AERCA](https://github.com/hanxiao0607/AERCA) repository, which provides a complete RCA pipeline.  
 - Place the LoCo core implementation under `models/` of the AERCA repository.  
 - Related scripts are provided in `rca/` of this repository.  
 - Follow the instructions in the AERCA repository to run RCA tasks.
 
-## Causal Discovery (CD)
+### Causal Discovery (CD)
 
 We adopt two repositories from CausalRivers:
 - [causalrivers](https://github.com/CausalRivers/causalrivers) for dataset processing.
@@ -118,17 +116,17 @@ We adopt two repositories from CausalRivers:
 - Related scripts are provided in `cd/` of this repository.  
 - Follow the instructions in the CausalRivers repositories to run CD tasks.
 
-# 🙏 Acknowledgements
+## 🙏 Acknowledgements
 
 We thank the following projects for providing datasets, code, and inspiration:
 
 - [DCdetector](https://github.com/DAMO-DI-ML/KDD2023-DCdetector.git) for cleaned versions of the datasets.
 - [TAB](https://github.com/decisionintelligence/TAB.git) for partial AD datasets and implementations of AD-specific and generative baselines.
 - [AERCA](https://github.com/hanxiao0607/AERCA) for RCA datasets and codebase.
-- [causalrivers-dataset](https://github.com/CausalRivers/causalrivers) for the ready-to-use causal discovery dataset.
-- [causalrivers-benchmark](https://github.com/CausalRivers/experiments) for the complete benchmark for comparison.
+- [Causalrivers-dataset](https://github.com/CausalRivers/causalrivers) for the ready-to-use causal discovery dataset.
+- [Causalrivers-benchmark](https://github.com/CausalRivers/experiments) for the complete benchmark for comparison.
 
-# 📝 Citation
+## 📝 Citation
 
 If you find this work useful, please cite our paper:
 
