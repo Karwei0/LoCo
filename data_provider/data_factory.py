@@ -20,9 +20,11 @@ class MSL_data_loader(Dataset):
         test_data = self.scaler.transform(test_data)
         test_label = np.load(os.path.join(root_path, 'MSL_test_label.npy'))
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.01))
+
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
 
     def __len__(self):
@@ -86,9 +88,11 @@ class PSM_data_loader(Dataset):
 
         test_label = pd.read_csv(os.path.join(root_path, 'test_label.csv')).values[:, 1:]
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.01))
+        
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
     
     def __len__(self):
@@ -146,9 +150,11 @@ class SMAP_data_loader(Dataset):
         test_data = self.scaler.transform(test_data)
         test_label = np.load(os.path.join(root_path, 'SMAP_test_label.npy'))
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.01))
+        
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
 
     def __len__(self):
@@ -207,9 +213,11 @@ class SMD_data_loader(Dataset):
         test_data = self.scaler.transform(test_data)
         test_label = np.load(os.path.join(root_path, 'SMD_test_label.npy'))
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.001))
+        
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
     
     def __len__(self):
@@ -269,9 +277,11 @@ class SWAT_data_loader(Dataset):
         train_data = self.scaler.transform(train_data)
         test_data = self.scaler.transform(test_data)
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.001))
+        
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
     
     def __len__(self):
@@ -328,9 +338,11 @@ class CICIDS_data_loader(Dataset):
         test_data = self.scaler.transform(test_data)
         test_label = np.load(os.path.join(root_path, 'CICIDS_test_label.npy'))
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.01))
+        
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
 
     def __len__(self):
@@ -387,9 +399,11 @@ class KDD99_data_loader(Dataset):
         test_data = self.scaler.transform(test_data)
         test_label = np.load(os.path.join(root_path, 'KDD99_test_label.npy'))
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.01))
+        
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
 
     def __len__(self):
@@ -448,9 +462,11 @@ class NIPS_TS_Creditcard_data_loader(Dataset):
         test_data = self.scaler.transform(test_data)
         test_label = np.load(os.path.join(root_path, 'NIPS_TS_creditcard_test_label.npy'))[int(n * 0.5):]
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.01))
+        
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
 
     def __len__(self):
@@ -507,9 +523,11 @@ class NIPS_TS_GECCO_data_loader(Dataset):
         test_data = self.scaler.transform(test_data)
         test_label = np.load(os.path.join(root_path, 'NIPS_TS_Water_test_label.npy'))
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.01))
+        
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
 
     def __len__(self):
@@ -566,9 +584,11 @@ class NIPS_TS_SWAN_data_loader(Dataset):
         test_data = self.scaler.transform(test_data)
         test_label = np.load(os.path.join(root_path, 'NIPS_TS_Swan_test_label.npy'))
 
+        val_len = max(self.seq_len + self.pred_len, int(len(train_data) * 0.01))
+        
         self.train_data = train_data
         self.test_data = test_data
-        self.val_data = test_data
+        self.val_data = train_data[-val_len:]
         self.test_label = test_label
 
     def __len__(self):
